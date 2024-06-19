@@ -8,7 +8,7 @@ app.disable('x-powered-by');
 app.use(corsMiddleware())
 
 // Routes
-app.use('/users', userRoutes);
+app.use('/usuarios', userRoutes);
 
 app.get('/', (req, res) => {
     res.json({ "message": 'Hola mundo' })
