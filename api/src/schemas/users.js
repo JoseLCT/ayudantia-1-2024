@@ -12,6 +12,10 @@ export function validateUser(user) {
     return userSquema.safeParse(user);
 }
 
+export function validateUpdateUser(user) {
+    return userSquema.omit({ password: true }).safeParse(user);
+}
+
 export function validatePartialUser(user) {
     return userSquema.partial().safeParse(user);
 }
