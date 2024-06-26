@@ -32,12 +32,13 @@ export class UserModel {
             last_name,
             email,
             phone_number,
-            password
+            password,
+            rol
         } = data;
         const query = {
-            text: `INSERT INTO usuario (name, last_name, email, phone_number, password)
-            VALUES ($1, $2, $3, $4, $5) RETURNING id, name, last_name, email, phone_number;`,
-            values: [name, last_name, email, phone_number, password]
+            text: `INSERT INTO usuario (name, last_name, email, phone_number, password, rol)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, last_name, email, phone_number, rol;`,
+            values: [name, last_name, email, phone_number, password, rol]
         }
         const result = await db.query(query);
         return result.rows[0];
@@ -80,5 +81,32 @@ export class UserModel {
         }
         const result = await db.query(query);
         return result.rowCount === 1;
+    }
+    static async login({ email, password }) {
+        const query = {
+            text: 'SELECT * FROM usuario WHERE email = $1 AND password = $2;',
+            values: [email, password]
+        }
+        const result = await db.query(query);
+        if (result.rowCount.length === 0) {
+            return null;
+        }
+        return result.rows[0];
+    }
+    static async subirImagen({ id, ruta }) {
+        const queryUser = {
+            text: 'SELECT * FROM usuario WHERE id = $1;',
+            values: [id]
+        }
+        const user = await db.query(queryUser);
+        if (user.rows.length === 0) {
+            return null;
+        }
+        const query = {
+            text: `UPDATE usuario SET imagen_url = $1 WHERE id = $2 RETURNING id, name, last_name, email, phone_number, imagen_url;`,
+            values: [ruta, id]
+        }
+        const result = await db.query(query);
+        return result.rows[0];
     }
 }

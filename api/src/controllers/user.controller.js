@@ -1,6 +1,7 @@
 // import { UserModel } from "../models/mysql/user.js";
 import { UserModel } from "../models/pg/user.js";
 import { validateUser, validateUpdateUser } from "../schemas/users.js";
+import { guardarImagen } from "../utils/image.js";
 
 export class UserController {
     static async getAll(req, res) {
@@ -50,5 +51,35 @@ export class UserController {
             return;
         }
         res.json({ message: 'Usuario eliminado' });
+    }
+
+    static async login(req, res) {
+        const {
+            email,
+            password
+        } = req.body;
+        const user = await UserModel.login({ email, password });
+        if (!user) {
+            res.status(401).json({ message: 'Usuario no encontrado' });
+        }
+        res.json(user);
+    }
+
+    static async subirImagen(req, res) {
+        const { id } = req.params;
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).json({ message: 'No hay archivos para subir' });
+        }
+        const imagen = req.files.imagen;
+        try {
+            const ruta = await guardarImagen('usuarios', imagen, id);
+            const usuario = await UserModel.subirImagen({ id, ruta });
+            if (!usuario) {
+                return res.status(401).json({ message: 'Usuario no encontrado' });
+            }
+            res.json(usuario);
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
